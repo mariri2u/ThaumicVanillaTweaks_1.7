@@ -1,6 +1,8 @@
 package mariri.thaumicvanillatweaks;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
@@ -10,6 +12,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
+import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
@@ -74,7 +77,7 @@ public class ThaumicVanillaTweaks {
         Configuration config = new Configuration(event.getSuggestedConfigurationFile());
         config.load();
         
-        WOOD_TWEAKS = config.get(Configuration.CATEGORY_GENERAL, "woodTweaks", true).getBoolean(true);
+        WOOD_TWEAKS = config.get(Configuration.CATEGORY_GENERAL, "woodTweaks", false).getBoolean(false);
         BED_TWEAKS = config.get(Configuration.CATEGORY_GENERAL, "bedTweaks", true).getBoolean(true);
         
 //        PlayerClickHandler.BEDTWEAKS_SET_RESPAWN_MESSAGE = config.get(Configuration.CATEGORY_GENERAL, "bedtweaksSetRespawnMessage", "Set Respawn!!").getString();
@@ -97,41 +100,52 @@ public class ThaumicVanillaTweaks {
 		
     	removeVanillaRecipe();
     	
-    	if(WOOD_TWEAKS){
     		
-    		ItemStack[] logs = new ItemStack[] {
-    				new ItemStack(Blocks.log, 1, 0), new ItemStack(Blocks.log, 1, 1),
-    				new ItemStack(Blocks.log, 1, 2), new ItemStack(Blocks.log, 1, 3),
-    				new ItemStack(Blocks.log2, 1, 0), new ItemStack(Blocks.log2, 1, 1)
-    		};
-    		ItemStack[] planks = new ItemStack[] {
-    				new ItemStack(Blocks.planks, 1, 0), new ItemStack(Blocks.planks, 1, 1),
-    				new ItemStack(Blocks.planks, 1, 2), new ItemStack(Blocks.planks, 1, 3),
-    				new ItemStack(Blocks.planks, 1, 4), new ItemStack(Blocks.planks, 1, 5)
-    		};
-    		ResearchPage[] pagePlanks = new ResearchPage[7];
-    		ResearchItem researchPlanks = ResearchHelper.makeResearch(RESEARCH_PLANK,
-    				new AspectList().add(Aspect.EARTH, 1).add(Aspect.TREE, 1),
-    				-4, 0, 0, false, planks[2], pagePlanks);
-    		ResearchPage[] pagePlanksPlus = new ResearchPage[7];
-    		ResearchItem researchPlanksPlus = ResearchHelper.makeResearch(RESEARCH_PLANK_PLUS,
-    				new AspectList().add(Aspect.EARTH, 1).add(Aspect.TREE, 1).add(Aspect.GREED, 1),
-    				-2, 1, 2, new String[]{ RESEARCH_PLANK }, false, planks[5], pagePlanksPlus);
+		ItemStack[] logs = new ItemStack[] {
+				new ItemStack(Blocks.log, 1, 0), new ItemStack(Blocks.log, 1, 1),
+				new ItemStack(Blocks.log, 1, 2), new ItemStack(Blocks.log, 1, 3),
+				new ItemStack(Blocks.log2, 1, 0), new ItemStack(Blocks.log2, 1, 1)
+		};
+		ItemStack[] planks = new ItemStack[] {
+				new ItemStack(Blocks.planks, 1, 0), new ItemStack(Blocks.planks, 1, 1),
+				new ItemStack(Blocks.planks, 1, 2), new ItemStack(Blocks.planks, 1, 3),
+				new ItemStack(Blocks.planks, 1, 4), new ItemStack(Blocks.planks, 1, 5)
+		};
+		
+		ResearchPage[] pagePlanks = new ResearchPage[7];
+		ResearchItem researchPlanks = ResearchHelper.makeResearch(RESEARCH_PLANK,
+				new AspectList().add(Aspect.EARTH, 1).add(Aspect.TREE, 1),
+				-4, 0, 0, false, planks[2], pagePlanks);
+		
+		ResearchPage[] pagePlanksPlus = new ResearchPage[7];
+		ResearchItem researchPlanksPlus = ResearchHelper.makeResearch(RESEARCH_PLANK_PLUS,
+				new AspectList().add(Aspect.EARTH, 1).add(Aspect.TREE, 1).add(Aspect.GREED, 1),
+				-2, 1, 2, new String[]{ RESEARCH_PLANK }, false, planks[5], pagePlanksPlus);
+    	
+		ResearchPage[] pageCharcoal = new ResearchPage[7];
+		ResearchItem researchCharcoal = ResearchHelper.makeResearch(RESEARCH_CHARCOAL,
+    			new AspectList().add(Aspect.FIRE, 1).add(Aspect.ENERGY, 1),
+    			0, 0, 0, false, new ItemStack(Items.coal, 1, 1), pageCharcoal);
 
-        	for(int i = 0; i < 6; i++){
-				ItemStack output;
-				output = planks[i].copy();
-				output.stackSize = 8;
-        		pagePlanks[1 + i] =
-        				new ResearchPage(ThaumcraftApi.addShapelessArcaneCraftingRecipe(
-        						RESEARCH_PLANK, output, new AspectList().add(Aspect.AIR, 1), new Object[] { logs[i] , logs[i] }) );
-        		output = planks[i].copy();
-        		output.stackSize = 6;
-        		pagePlanksPlus[1 + i] =
-        				new ResearchPage(ThaumcraftApi.addCrucibleRecipe(
-        						RESEARCH_PLANK_PLUS, output, (Object)logs[i],
-        						new AspectList().add(Aspect.AIR, 2).add(Aspect.PLANT, 1) ) );
-        	}
+		
+    	for(int i = 0; i < 6; i++){
+			ItemStack output;
+			output = planks[i].copy();
+			output.stackSize = WOOD_TWEAKS ? 8 : 10;
+    		pagePlanks[1 + i] =
+    				new ResearchPage(ThaumcraftApi.addShapelessArcaneCraftingRecipe(
+    						RESEARCH_PLANK, output, new AspectList().add(Aspect.AIR, 1), new Object[] { logs[i] , logs[i] }) );
+    		output = planks[i].copy();
+    		output.stackSize = 6;
+    		pagePlanksPlus[1 + i] =
+    				new ResearchPage(ThaumcraftApi.addCrucibleRecipe(
+    						RESEARCH_PLANK_PLUS, output, (Object)logs[i],
+    						new AspectList().add(Aspect.AIR, 2).add(Aspect.PLANT, 1) ) );
+    		
+    		pageCharcoal[i + 1] =
+    				new ResearchPage(ThaumcraftApi.addCrucibleRecipe(
+    						RESEARCH_CHARCOAL, new ItemStack(Items.coal, 1, 1), (Object)logs[i],
+    						new AspectList().add(Aspect.FIRE, 1) ) );
     		
 //	    	addResearchShapeless(
 //	    			RESEARCH_PLANK, new AspectList().add(Aspect.EARTH, 1).add(Aspect.TREE, 1),
@@ -141,17 +155,14 @@ public class ThaumicVanillaTweaks {
 //	    			RESEARCH_PLANK_PLUS, new AspectList().add(Aspect.EARTH, 1).add(Aspect.TREE, 1).add(Aspect.GREED, 1),
 //	    			-2, 2, 2, 2, new String[]{RESEARCH_PLANK}, false,
 //	    			Blocks.log, 3, Blocks.planks, 18 , new AspectList().add(Aspect.EARTH, 2), 6);
-        	ResearchHelper.addResearchShaped(RESEARCH_STICK,
-        			new AspectList().add(Aspect.TOOL, 1).add(Aspect.TREE, 1),
-	     			-2, -1, 0, new String[]{RESEARCH_PLANK}, false,
-	     			new Object[] { "X", "X", "X", 'X', Blocks.planks }, new ItemStack(Items.stick, 6),
-	     			new AspectList().add(Aspect.AIR, 1));
     	}
     	
-    	ResearchHelper.addResearchCrucible(RESEARCH_CHARCOAL,
-    			new AspectList().add(Aspect.FIRE, 1).add(Aspect.ENERGY, 1),
-    			0, 0, 0, false,
-    			new ItemStack(Blocks.log), new ItemStack(Items.coal, 1), new AspectList().add(Aspect.FIRE, 1));
+       	ResearchHelper.addResearchShaped(RESEARCH_STICK,
+    			new AspectList().add(Aspect.TOOL, 1).add(Aspect.TREE, 1),
+     			-2, -1, 0, new String[]{RESEARCH_PLANK}, false,
+     			new Object[] { "X", "X", "X", 'X', Blocks.planks }, new ItemStack(Items.stick, WOOD_TWEAKS ? 6 : 9),
+     			new AspectList().add(Aspect.AIR, 1));
+    	
     	ResearchHelper.addResearchShaped(RESEARCH_FLINT_AND_STEEL,
     			new AspectList().add(Aspect.FIRE, 1).add(Aspect.METAL, 1).add(Aspect.TRAP, 1),
     			2, 1, 2, new String[]{RESEARCH_CHARCOAL}, false,
@@ -163,12 +174,12 @@ public class ThaumicVanillaTweaks {
     			new ItemStack(Items.wheat), new ItemStack(Items.bread), new AspectList().add(Aspect.FIRE, 2));
     	ResearchHelper.addResearchShaped(RESEARCH_BUCKET,
     			new AspectList().add(Aspect.WATER, 1).add(Aspect.METAL, 1).add(Aspect.MOTION, 1),
-    			0, 2, 1, false,
+    			2, 3, 1, false,
     			new Object[] { "I I", " I ", 'I', Items.iron_ingot }, new ItemStack(Items.bucket),
     			new AspectList().add(Aspect.ORDER, 4));
     	ResearchHelper.addResearchInfusion(RESEARCH_ENDER_EYE,
     			new AspectList().add(Aspect.SENSES, 1).add(Aspect.TRAVEL, 1).add(Aspect.FIRE, 1).add(Aspect.VOID, 1),
-    			2, 3, 2, new String[]{ RESEARCH_BUCKET, RESEARCH_FLINT_AND_STEEL }, false,
+    			4, 2, 2, new String[]{ RESEARCH_BUCKET, RESEARCH_FLINT_AND_STEEL }, false,
     			new ItemStack(Items.ender_pearl),
     			new ItemStack[] { new ItemStack(Items.blaze_powder), new ItemStack(Items.blaze_powder) },
     			new ItemStack(Items.ender_eye),
@@ -179,25 +190,25 @@ public class ThaumicVanillaTweaks {
     			4, 0, 2, new String[]{RESEARCH_CHARCOAL}, false, new ItemStack(Blocks.torch), new ResearchPage[1]);
     	ResearchHelper.makeResearch(RESEARCH_WAYPOINT,
     			new AspectList().add(Aspect.ORDER, 1).add(Aspect.TRAVEL, 1).add(Aspect.MOTION, 1),
-    			4, 2, 1, false, new ItemStack(Items.map), new ResearchPage[1]);  
+    			4, -2, 1, false, new ItemStack(Items.compass), new ResearchPage[1]);  
 //    	addResearchNoRecipe(RESEARCH_WAYPOINT, new AspectList().add(Aspect.ORDER, 1).add(Aspect.TRAVEL, 1).add(Aspect.MOTION, 1),
 //    			0, 4, 1, false, new ItemStack(Items.map));
 //    	addResearchNoRecipe(RESEARCH_SPAWN_CHECKER, new AspectList().add(Aspect.VOID, 1).add(Aspect.LIGHT, 1).add(Aspect.ORDER, 1),
 //    			2, 2, 2, new String[]{RESEARCH_CHARCOAL}, false, new ItemStack(Blocks.torch));
     	
-    	if(BED_TWEAKS){
-    		ResearchHelper.makeResearch(RESEARCH_SET_RESPAWN,
-    				new AspectList().add(Aspect.VOID, 1).add(Aspect.ORDER, 1).add(Aspect.HEAL, 1),
-	    			0, -2, 2, false, new ItemStack(Items.bed), new ResearchPage[1]);
-    		ResearchHelper.makeResearch(RESEARCH_SLEEP,
-    				new AspectList().add(Aspect.LIGHT, 1).add(Aspect.DARKNESS, 1).add(Aspect.MAN, 1),
-	    			2, -3, 2, new String[]{ RESEARCH_SET_RESPAWN }, false, new ItemStack(Items.clock), new ResearchPage[1]);
+		ResearchHelper.makeResearch(RESEARCH_SET_RESPAWN,
+				new AspectList().add(Aspect.VOID, 1).add(Aspect.ORDER, 1).add(Aspect.HEAL, 1),
+    			0, -2, 2, false, new ItemStack(Items.bed), new ResearchPage[1]);
+		ResearchHelper.makeResearch(RESEARCH_SLEEP,
+				new AspectList().add(Aspect.LIGHT, 1).add(Aspect.DARKNESS, 1).add(Aspect.MAN, 1),
+    			2, -3, 2, new String[]{ RESEARCH_SET_RESPAWN }, false, new ItemStack(Items.clock), new ResearchPage[1]);
     		
-//    		addResearchNoRecipe(RESEARCH_SET_RESPAWN, new AspectList().add(Aspect.VOID, 1).add(Aspect.ORDER, 1).add(Aspect.HEAL, 1),
-//	    			2, 4, 2, false, new ItemStack(Items.bed));
-//	    	addResearchNoRecipe(RESEARCH_SLEEP, new AspectList().add(Aspect.LIGHT, 1).add(Aspect.DARKNESS, 1).add(Aspect.MAN, 1),
-//	    			4, 4, 2, new String[]{ RESEARCH_SET_RESPAWN }, false, new ItemStack(Items.clock));
+//    	addResearchNoRecipe(RESEARCH_SET_RESPAWN, new AspectList().add(Aspect.VOID, 1).add(Aspect.ORDER, 1).add(Aspect.HEAL, 1),
+//	    		2, 4, 2, false, new ItemStack(Items.bed));
+//	    addResearchNoRecipe(RESEAR		CH_SLEEP, new AspectList().add(Aspect.LIGHT, 1).add(Aspect.DARKNESS, 1).add(Aspect.MAN, 1),
+//	    		4, 4, 2, new String[]{ RESEARCH_SET_RESPAWN }, false, new ItemStack(Items.clock));
 	    	
+        if(BED_TWEAKS){
         	MinecraftForge.EVENT_BUS.register(new PlayerClickHandler());
         	
         	if(Loader.isModLoaded("McAssistant")){
@@ -238,7 +249,7 @@ public class ThaumicVanillaTweaks {
         List recipeList = CraftingManager.getInstance().getRecipeList();
         for(int i = 0; i < recipeList.size(); i++){
         	IRecipe recipe = (IRecipe)recipeList.get(i);
-        	if(recipe.getRecipeOutput() != null){
+        	try{
         		Item iout = recipe.getRecipeOutput().getItem();
         		Block bout = Blocks.air;
         		if(iout instanceof ItemBlock){
@@ -248,7 +259,6 @@ public class ThaumicVanillaTweaks {
         		if(WOOD_TWEAKS && (iout == Items.stick || bout == Blocks.planks) ){
         			recipe.getRecipeOutput().stackSize = 3;
         		}else if(
-        				(iout == Items.coal && meta == 1) ||
         				iout == Items.flint_and_steel ||
 //        				iout == Items.diamond_pickaxe ||
         				iout == Items.bucket ||
@@ -267,7 +277,28 @@ public class ThaumicVanillaTweaks {
         				){
         			recipeList.remove(i);
         		}
+        	}catch(NullPointerException e){}
+        }
+        Map furnaceList = FurnaceRecipes.smelting().getSmeltingList();
+//        FurnaceRecipes furnaceRecipes = FurnaceRecipes.smelting();
+//        ItemStack out = furnaceRecipes.getSmeltingResult(new ItemStack(Blocks.log));
+//        furnaceRecipes.getSmeltingList().
+        for(Iterator iter = furnaceList.keySet().iterator(); iter.hasNext(); ){
+        	ItemStack output = (ItemStack)furnaceList.get(iter.next());
+        	if(output.getItem() == Items.coal && output.getItemDamage() == 1){
+                iter.remove();
         	}
+//        	ItemStack input = (ItemStack)in;
+//        	ItemStack output = (ItemStack)furnaceList.get(in);
+//    		Item iout = output.getItem();
+//    		Block bout = Blocks.air;
+//    		if(iout instanceof ItemBlock){
+//    			bout = ((ItemBlock)iout).field_150939_a;
+//    		}
+//    		int meta = input.getItemDamage();
+//    		if(iout == Items.coal && meta == 1){
+//    			furnaceList.remove(input);
+//    		}
         }
     }
 }
