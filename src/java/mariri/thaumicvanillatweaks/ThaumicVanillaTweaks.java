@@ -175,7 +175,7 @@ public class ThaumicVanillaTweaks {
     	ResearchHelper.addResearchShaped(RESEARCH_BUCKET,
     			new AspectList().add(Aspect.WATER, 1).add(Aspect.METAL, 1).add(Aspect.MOTION, 1),
     			2, 3, 1, false,
-    			new Object[] { "I I", " I ", 'I', Items.iron_ingot }, new ItemStack(Items.bucket),
+    			new Object[] { "I I", " I ", 'I', "ingotThaumium" }, new ItemStack(Items.bucket),
     			new AspectList().add(Aspect.ORDER, 4));
     	ResearchHelper.addResearchInfusion(RESEARCH_ENDER_EYE,
     			new AspectList().add(Aspect.SENSES, 1).add(Aspect.TRAVEL, 1).add(Aspect.FIRE, 1).add(Aspect.VOID, 1),
